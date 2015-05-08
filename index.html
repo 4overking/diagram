@@ -1,11 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
     <head>
         <title>Diagram Builder</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+        <script type="text/javascript" src="js/jquery.min.js" ></script>
+        <script type="text/javascript" src="js/jquery-ui.min.js" ></script>
+        <script type="text/javascript" src="js/script.js" ></script>
     </head>
     <body>
-        <div>TODO write content</div>
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Diagram Maker</a>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <h2 class="sub-header">Данные </h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="col-md-1"></th>
+                            <th class="col-md-7"></th>
+                            <th class="col-md-2"></th>
+                            <th class="col-md-1"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="table">
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" aria-label="Left Align" id="addRow">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    Добавить
+                </button>
+                            <button type="button" class="btn btn-primary" aria-label="Left Align" id="drawCircle" onclick="drawCircleDiagram()">
+                <span class="glyphicon glyphicon-adjust" aria-hidden="true"></span>
+                Круговая
+            </button>
+            <button type="button" class="btn btn-info" aria-label="Left Align" id="drawBar" onclick="drawBarDiagram()">
+                <span class="glyphicon glyphicon-tasks" aria-hidden="true"></span>
+                Линейная 
+            </button>
+            </div>
+            <h2 class="sub-header">Диаграмма</h2>
+            <div id="diagram-wrapper">
+                <canvas width="300" height="300" id="diagram"></canvas>
+              <!--  <canvas width="800px" height="600" id="diagramSignature"></canvas>-->
+            </div>
+
+        </div>
+        <datalist id="dataColorList">
+            <option>#FF6347</option>
+            <option>#7FFF00</option>
+            <option>#4169E0</option>
+            <option>#FFD700</option>
+            <option>#FFA500</option>
+            <option>#00BFFFoption>
+            <option>#FF00FF</option>
+            <option>#B22222</option>
+            <option>#FF8C00</option>
+            <option>#7CFC00</option>
+            <option>#00FF00</option>
+            <option>#1E90FF</option>
+            <option>#9932CC</option>
+            <option>#808080</option>
+        </datalist>
     </body>
 </html>
