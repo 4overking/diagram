@@ -10,8 +10,14 @@ $(document).ready(function () {
     $("#diagram").draggable({
         grid: document.documentGrid,
         containment: 'parent'
+    }).on("dragstop", function () {
+        updatePaths();
     });
 });
+/*
+ * Добавления строк в таблицу
+ * @returns {undefined}
+ */
 function addRow()
 {
     var colorStack = ["#FF6347", "#7FFF00", "#4169E0", "#FFD700", "#FFA500", "#00BFFF", "#FF00FF",
@@ -41,7 +47,10 @@ function addRow()
         });
     });
 }
-
+/*
+ * Ф-ция получения исходных дынных для отрисовки
+ * @returns {Array|getJson.stack}
+ */
 function getJson() {
     var stack = [];
     stack.sum = 0;
@@ -54,7 +63,10 @@ function getJson() {
     });
     return stack;
 }
-
+/*
+ * Функция отрисовывающая круговую диаграмму
+ * @returns {undefined}
+ */
 function drawCircleDiagram()
 {
     deleteDescStrip();
@@ -85,20 +97,33 @@ function drawCircleDiagram()
         var circlePart = CIRCLE * (part["dataVal"] / sum);
         drawSector(centerX, centerY, diagramRadius, lastEnd, lastEnd + circlePart, true);
         drawSector(centerX, centerY, diagramRadius, lastEnd, lastEnd + circlePart, false);
-        var desc = createDescStrip(part["dataColor"], part["dataText"], part["dataVal"] / sum);
-        buildDescConnection(desc);
         //var startXY = [centerX + diagramRadius, centerY]
-        var angle = lastEnd+circlePart/2;
-        var sectorX = centerX + diagramRadius*Math.cos(angle);
-        var sectorY = centerY + diagramRadius*Math.sin(angle);
+        var angle = lastEnd + circlePart / 2;
+        var sectorX = centerX + diagramRadius * Math.cos(angle);
+        var sectorY = centerY + diagramRadius * Math.sin(angle);
+        var sectorCenter = {X: sectorX, Y: sectorY};
+        var desc = createDescStrip(part["dataColor"], part["dataText"], part["dataVal"] / sum, sectorCenter);
+       // buildDescConnection(desc);
         /**************************************/
         ctx.beginPath();
-        ctx.rect(sectorX-2, sectorY-2, 5, 5);
+        ctx.rect(sectorX - 2, sectorY - 2, 5, 5);
         ctx.fillStyle = "red";
         ctx.fill();
-            /**************************************/
+        /**************************************/
+       
         lastEnd += circlePart;
     }
+    updatePaths();
+    /*
+     * Отрисовка сектора
+     * @param {type} centerX - координата Х центра
+     * @param {type} centerY - координата Y центра
+     * @param {type} diagramRadius - радиус
+     * @param {type} sAngle - начальный угол
+     * @param {type} eAngle - конечный угол
+     * @param {type} fill - цвет заливки
+     * @returns {undefined}
+     */
     function drawSector(centerX, centerY, diagramRadius, sAngle, eAngle, fill)
     {
         ctx.moveTo(centerX, centerY);
@@ -117,33 +142,40 @@ function drawCircleDiagram()
     $(".DescStripWrapper").draggable({
         containment: 'parent',
         grid: document.documentGrid,
-    }).on("dragstop", function (){buildDescConnection($(this)[0])});
+    }).on("dragstop", function () {
+            updatePaths();
+    });
 }
-
-function createDescStrip(color, txt, pers)
+/*
+ * создание мини опианий и вставка их в обёртку
+ * @param {type} color - цвет квадрата
+ * @param {type} txt - текст описания
+ * @param {type} pers - проценты
+ * @param {type} sectorCenter - координаты центра сектора на круговой диаграмме
+ * @returns {Element|createDescStrip.wrapper}
+ */
+function createDescStrip(color, txt, pers, sectorCenter)
 {
     txt = txt || "!!!!!!!!!!!!!";
-
     var strip = document.createElement("canvas");
     var wrapper = document.createElement("div");
     var container = document.getElementById("diagram-wrapper");
     var ctx = strip.getContext('2d');
     strip.className = "DescStrip";
     wrapper.className = "DescStripWrapper";
+    wrapper.sectorCenter = sectorCenter;
     ctx.font = '16pt Calibri';
     var txtWidth = ctx.measureText(txt).width;
     if (txtWidth > 200)
     {
-        strip.width = txtWidth+50;
-        wrapper.style.width = txtWidth+50+"px";
+        strip.width = txtWidth + 50;
+        wrapper.style.width = txtWidth + 50 + "px";
     }
     else
     {
         strip.width = 200;
     }
     strip.height = 30;
-
-
     ctx.beginPath();
     ctx.rect(5, 5, 20, 20);
     ctx.fillStyle = color;
@@ -153,9 +185,14 @@ function createDescStrip(color, txt, pers)
     ctx.fillText(txt, 40, 22);
     wrapper.appendChild(strip);
     container.appendChild(wrapper);
+    // console.log(strip.width);
     return wrapper;
 
 }
+/*
+ * Удаление описаний
+ * @returns {undefined}
+ */
 function deleteDescStrip()
 {
     var strips = document.getElementsByClassName("DescStripWrapper");
@@ -166,14 +203,101 @@ function deleteDescStrip()
     }
 
 }
-
+/*
+ * Обновление всех привязок описаний к круговой диаграмме
+ * @returns {undefined}
+ */
+function updatePaths()
+{
+    var descs = document.getElementsByClassName("DescStripWrapper");
+     var canvas = document.getElementById("diagramSignature");
+     var ctx = canvas.getContext('2d');
+     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i=0; i< descs.length;i++)
+    {
+        buildDescConnection(descs[i]);
+    }
+}
+/**
+ * создание соеденений описаний к диаграмме
+ * @param {type} desc - координаты описания
+ * @returns {undefined}
+ */
 function buildDescConnection(desc)
 {
-   /*  var x = (event.offsetX == undefined) ? event.layerX : event.offsetX;
-    var y = (event.offsetY == undefined )? event.layerY : event.offsetY;*/
-    console.log($(desc).position());
-    
+    var canvas = document.getElementById("diagramSignature");
+    var diagram = document.getElementById("diagram");
+    var ctx = canvas.getContext('2d');
+    var sectorCenter = desc.sectorCenter;
+    var start = {X: diagram.offsetLeft + sectorCenter.X,
+        Y: diagram.offsetTop + sectorCenter.Y};
+    var end = {X: desc.offsetLeft,
+        Y: desc.offsetTop + 15};
+    var path = Pathfinding(start, end);
+    ctx.beginPath();
+    for (var i in path) {
+        if (i == 0)
+            ctx.moveTo(path[i].X, path[i].Y);
+        else
+            ctx.lineTo(path[i].X, path[i].Y);
+    }
+    ctx.stroke();
+
 }
+function Pathfinding(start, end)
+{
+    var tail = {X:end.X-5, Y:end.Y};
+    return [start, tail,end];
+}
+function PathSelect(btn)
+{
+
+    if (btn.state != "start")
+    {
+       $(btn).html(' <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Завершить');
+        btn.state = "start"
+        $("#diagram-wrapper").on("click", function (e){
+            
+         /*$("#diagram-wrapper").on("click", function (e){
+            //console.log({X: e.offsetX, Y:e.offsetY});
+            if (stack.length===0)
+            {
+               if (e.target.className ==="DescStrip")
+               { 
+                   var wrapper = e.target.parentNode;
+                   endPoint = wrapper.sectorCenter;
+                   stack.push({X:wrapper.offsetTop, Y:wrapper.offsetLeft});
+                    //console.log(endPoint);
+               }
+                else
+                {
+                    endPoint = {X:e.offsetTop, Y:e.offsetLeft};
+                    stack.push(endPoint);
+                }
+            }
+        });*/
+        
+    }
+    else
+    {
+        console.log(this);
+        $(btn).html(' <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Редактор пути');
+        btn.state = "";
+
+    }
+}
+/*******************методы для поиска соеденителей диаграммы с описанием**************/
+function detectMouseClickOnLine(){};
+function detectDoubleMouseClickOnLine(e)
+{
+    e = e || window.event;
+    
+};
+
+/**
+ * Отрисовка ленточной диаграммы
+ * @returns {undefined}
+ */
 function drawBarDiagram()
 {
     var canvas = document.getElementById('diagram'),
@@ -222,13 +346,24 @@ function drawBarDiagram()
 
 
 }
-$("iframe").each(function () {
-    $(this).attr("src", $(this).attr("ssrc"));
-    $(this).removeAttr("ssrc");
-
-});
 
 
+/*
+ * надпись преследующая мышь
+ * @returns {undefined}
+ */
+function mouseHelper()
+{
+    var helper = document.getElementById("mouseHelper") || document.createElement("div");
+    helper.id = "mouseHelper";
+    document.body.appendChild(helper);
+    helper.innerHTML = "";
+    /*for (var i in state)
+     helper.innerHTML+=i+" - "+state[i]+"<br>";*/
+    helper.innerHTML = "i`m a helper";
 
+    helper.style.top = e.pageY + 13 + "px";
+    helper.style.left = e.pageX + 10 + "px";
+}
 
 

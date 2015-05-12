@@ -1,3 +1,7 @@
+body
+{
+    background: #f4f4f4;
+}
 .container{
     padding-top: 50px;
 }
@@ -13,6 +17,7 @@
     width: 800px;
     height: 600px;
     box-shadow: 0 0 15px -3px rgba(0, 0, 0, 0.15);
+    background: white;
 }
 .diagram-wrapper canvas
 {
@@ -27,6 +32,12 @@
 {
     width: 800px;
     height: 600px;
+      position: absolute;
+    left: 0px;
+    top: 0px;
+    margin: 0px;
+    padding: 0px;
+    
 }
 .DescStripWrapper
 {
