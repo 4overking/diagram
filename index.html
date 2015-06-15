@@ -38,29 +38,125 @@
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                     Добавить
                 </button>
-            <button type="button" class="btn btn-primary" aria-label="Left Align" id="drawCircle" onclick="drawCircleDiagram()">
-                <span class="glyphicon glyphicon-adjust" aria-hidden="true"></span>
-                Круговая
-            </button>
-            <button type="button" class="btn btn-warning" aria-label="Left Align" id="PathSelect" onclick="PathSelect(this)">
-                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-                Выбор пути
-            </button>
-            <button type="button" class="btn btn-info" aria-label="Left Align" id="drawBar" onclick="drawBarDiagram()">
-                <span class="glyphicon glyphicon-tasks" aria-hidden="true"></span>
-                Линейная 
-            </button>
+                <div class="btn-group" data-toggle="buttons" id="diagramSelector">
+                    <label class="btn btn-primary " id="RadialDiagram" onclick="drawDiagram()">
+                        <input type="radio"  name="radial" value="radial" checked/> Радиальная
+                    </label> 
+                    <label class="btn btn-warning active" id="LineralDiagram" onclick="drawDiagram()">
+                        <input type="radio"  name="lineral" value="lineral" /> Линейная
+                    </label> 
+                </div>
+                <a href="#" download="diagram.png" class="btn btn-link " aria-label="Left Align" id="saveDiagram" onclick="saveDiagram()" >
+                    <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                    Сохранить
+                </a>
             </div>
             <h2 class="sub-header">Диаграмма</h2>
             <div id="diagram-wrapper">
-                <canvas width="800" height="600" id="diagramSignature"></canvas>
-                <canvas width="300" height="300" id="diagram"></canvas>
+                <canvas width="800" height="600" id="diagramBackground" class="canva"></canvas>
+                <canvas width="800" height="600" id="diagramSignature" class="canva"></canvas>
+                <canvas width="300" height="300" id="diagram" class="canva"></canvas>
             </div>
             <h2 class="sub-header">Настройки</h2>
-            <form >
+            <form class="fromPreferences" id="radialPref">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="InputFontSize">Размер шрифта</label>
+                        <input type="number" class="form-control" id="InputFontSize"  onkeypress="return event.charCode >= 48 && event.charCode <= 57" min="6" max="72" value="16">
+                        <div class="checkbox"> </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="InputFontColor">Цвет шрифта</label>
+                        <input type="color" class="form-control" id="InputFontColor" value="#000000">
+                        <div class="checkbox"> </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="InputFontName">Шрифт</label>
+                        <select class="form-control" id="InputFontName">
+                            <option>Calibri</option>
+                            <option>Arial</option>
+                            <option>Helvetica</option>
+                            <option>Times New Roman</option>
+                            <option>Courier New</option>
+                            <option>Verdana</option>
+                            <option>Geneva</option>
+                            <option>Georgia</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="checkbox-inline"><input type="checkbox" value="" id="InputShowPaths" checked>Показывать пути</label>
+                        <input type="color" id="InpuPathColor"value="#000000">
+                        <input type="number" class="" id="InputLineThickness" onkeypress="return event.charCode >= 48 && event.charCode <= 57" min="1" max="10" value="1">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="checkbox-inline"><input type="checkbox" value="" id="InputShowPers" checked>Показывать значения</label>
+                        <label class="radio-inline">
+                            <input type="radio" id="showPers" name="inlineRadioOptions" checked="">%
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" id="showVal" name="inlineRadioOptions">Зн
+                        </label>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="checkbox-inline"><input type="checkbox" value="" id="InputColorDesc" checked>Показывать цвет  </label>
+                    </div>
+
+                </div>
+                <br>
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <label class="radio-inline">
+                            <input type="radio" id="InputSetFillColor" name="inlineRadioOptions">Заливка цветом
+                        </label>
+                        <input type="color" id="InputFillColor" disabled="">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="radio-inline">
+                            <input type="radio" id="InputSetFillTexture" name="inlineRadioOptions">Заливка текстурой
+                        </label>
+                        <button type="button" class="btn" aria-label="Left Align" id="selectTexture" disabled="">
+                            <span class="glyphicon glyphicon-upload " aria-hidden="true"></span>
+                            Выбрать
+                        </button>
+                        <input type="file" id="InputFillTexture" style="display: none" title="111">
+
+                    </div>
+                    <div class="col-md-3">
+                        
+                    </div>
+                </div>
+               <br> 
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="InputRadius">Внутренний диаметр</label>
+                        <input type="number" class="form-control" id="InputRadius" onkeypress="return event.charCode >= 48 && event.charCode <= 57" min="0" max="200" value="50">
+                        <div class="checkbox"> </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="InputRadius">Внешний диаметр</label>
+                        <input type="number" class="form-control" id="InputOuterRadius" onkeypress="return event.charCode >= 48 && event.charCode <= 57" min="0" max="1000" value="300">
+                        <div class="checkbox"> </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="InputRadius">Расстояние сектора</label>
+                        <input type="number" class="form-control" id="InputSectorSepWidth" onkeypress="return event.charCode >= 48 && event.charCode <= 57" min="0" max="200" value="3">
+                        <div class="checkbox"> </div>
+                    </div>
+                </div>
                 
+               <hr style="width: 800px">
+               <div class="row">
+               </div>
             </form>
 
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
         </div>
         <datalist id="dataColorList">
             <option>#FF6347</option>
